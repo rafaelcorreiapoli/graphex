@@ -1,21 +1,21 @@
 export interface IArgsMap {[key: string]: string | number}
 
-export interface INode {
+export interface IGenericNode {
   name: string
   args?: IArgsMap
   auth?: () => boolean
   custom?: () => any
 }
-export interface IScalarNode extends INode {
+export interface IScalarNode extends IGenericNode {
   isScalar: true
 }
-export interface IObjectNode extends INode {
+export interface IObjectNode extends IGenericNode {
   isScalar: false
-  children: ISelectionNode[]
+  children: INode[]
   relationToParent?: string
   label: string
 }
-export type ISelectionNode = IScalarNode | IObjectNode
+export type INode = IScalarNode | IObjectNode
 
 const writeArgs = (args: IArgsMap) => {
   if (!args) { return '' }
@@ -49,7 +49,7 @@ export const cypherChildren = (parent: IObjectNode, lastNestedFieldName: string)
   }).join(', ')
 }
 
-export const selectionToCypher = (selection: ISelectionNode) => {
+export const selectionToCypher = (selection: INode) => {
   if (!selection.isScalar) {
     const objectNode = selection as IObjectNode
     return `MATCH ${writeObjectNode(objectNode.name, objectNode.label, objectNode.args)} RETURN ${objectNode.name} { ${cypherChildren(objectNode, objectNode.name)} }`

@@ -1,6 +1,6 @@
-import { ISelectionNode } from '../src';
+import { INode } from '../src';
 
-export const mySelection2: ISelectionNode = {
+export const mySelection2: INode = {
   name: 'technology',
   label: 'Technology',
   args: {
@@ -22,7 +22,7 @@ export const mySelection2: ISelectionNode = {
   }],
 }
 
-export const mySelection: ISelectionNode = {
+export const mySelection: INode = {
   name: 'product',
   label: 'Product',
   args: {
