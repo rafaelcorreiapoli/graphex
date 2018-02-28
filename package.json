@@ -21,7 +21,11 @@
   "devDependencies": {
     "@semantic-release/changelog": "^1.0.1",
     "@semantic-release/git": "^3.0.1",
+    "@types/graphql": "^0.12.4",
     "@types/jest": "^22.1.2",
+    "@types/lodash": "^4.14.104",
+    "@types/node": "^9.4.6",
+    "@types/pluralize": "^0.0.28",
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.1.0",
     "jest": "^22.3.0",
@@ -74,5 +78,13 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/rafaelcorreiapoli/graphex.git"
+  },
+  "dependencies": {
+    "graphql": "^0.13.1",
+    "graphql-date": "^1.0.3",
+    "graphqltools": "^0.0.1",
+    "lodash": "^4.17.5",
+    "pluralize": "^7.0.0",
+    "util": "^0.10.3"
   }
 }
