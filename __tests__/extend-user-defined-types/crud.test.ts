@@ -55,10 +55,10 @@ allPosts: [Post]
 }
 type Mutation {
 addUser(input: AddUserInput!): User
-editUser(_id: ID!, input: EditUserInput!): User
+editUser(input: EditUserInput!): User
 deleteUser(_id: ID!): User
 addPost(input: AddPostInput!): Post
-editPost(_id: ID!, input: EditPostInput!): Post
+editPost(input: EditPostInput!): Post
 deletePost(_id: ID!): Post
 }
 schema {

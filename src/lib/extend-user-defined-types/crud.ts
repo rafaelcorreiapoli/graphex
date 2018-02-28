@@ -6,7 +6,7 @@ import { IGraphexType, IGraphexSchema, IGraphexField, IGraphexNode } from '../gr
 import { TypeNode } from 'graphql';
 
 const BANG = '!'
-export const joinWithLF = (lines: string[]): string => lines.filter(ln => ln !== null).join('\n')
+export const joinWithLF = (lines: string[]): string => lines.filter((ln) => ln !== null).join('\n')
 const getAddInputTypeNameForNode = (node: IGraphexNode): string => `Add${node.type}Input`
 const getEditInputTypeNameForNode = (node: IGraphexNode): string => `Edit${node.type}Input`
 
@@ -28,7 +28,7 @@ export const generateInput = (type: IGraphexType): string => joinWithLF([
 const generateInputs = (graphexSchema: IGraphexType[]): string => joinWithLF(graphexSchema.map(generateInput))
 
 const getAddQuery = (type: IGraphexType): string => `add${type.name}(input: ${getAddInputTypeNameForNode(type)}${BANG}): ${type.name}`
-const getEditQuery = (type: IGraphexType): string => `edit${type.name}(_id: ID!, input: ${getEditInputTypeNameForNode(type)}${BANG}): ${type.name}`
+const getEditQuery = (type: IGraphexType): string => `edit${type.name}(input: ${getEditInputTypeNameForNode(type)}${BANG}): ${type.name}`
 const getDeleteQuery = (type: IGraphexType): string => `delete${type.name}(_id: ID!): ${type.name}`
 
 export const attachCrudOperations = (userTypes: string, graphexSchema: IGraphexType[]): string => {
