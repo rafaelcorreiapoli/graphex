@@ -1,4 +1,4 @@
-import { attachCrudOperations, generateInput } from '../../src/lib/extend-user-defined-types/crud'
+import { attachCrudOperations, generateInput, joinWithLF } from '../../src/lib/extend-user-defined-types/crud'
 import { graphexSchema } from './fixtures'
 const userTypes = `type User @auth(fn: "isOwner"){
   _id: ID!
@@ -14,16 +14,25 @@ type Post {
   author: User! @relation(name: "UserPosts")
 }`
 
-const expected = `input UserInput {
+const expected = `input AddUserInput {
 name: String!
 numbers: Float
 scopes: String!
-posts: PostInput!
 }
-input PostInput {
+input EditUserInput {
+_id: ID!
+name: String!
+numbers: Float
+scopes: String!
+}
+input AddPostInput {
 text: String
 secretNote: String
-author: UserInput!
+}
+input EditPostInput {
+_id: ID!
+text: String
+secretNote: String
 }
 type User @auth(fn: "isOwner"){
   _id: ID!
@@ -45,11 +54,11 @@ post: Post
 allPosts: [Post]
 }
 type Mutation {
-addUser(input: UserInput!): User
-editUser(_id: ID!, input: UserInput!): User
+addUser(input: AddUserInput!): User
+editUser(_id: ID!, input: EditUserInput!): User
 deleteUser(_id: ID!): User
-addPost(input: PostInput!): Post
-editPost(_id: ID!, input: PostInput!): Post
+addPost(input: AddPostInput!): Post
+editPost(_id: ID!, input: EditPostInput!): Post
 deletePost(_id: ID!): Post
 }
 schema {
@@ -93,7 +102,15 @@ describe('generateInput', () => {
         directives: {},
       }],
     }
-    const expectedGeneratedInput = 'input TechnologyDescriptionInput {\nname: String\n}'
+    const expectedGeneratedInput = joinWithLF([
+      'input AddTechnologyDescriptionInput {',
+      'name: String',
+      '}',
+      'input EditTechnologyDescriptionInput {',
+      '_id: ID!',
+      'name: String',
+      '}',
+    ])
     expect(generateInput(technologyDescriptionType)).toEqual(expectedGeneratedInput)
   })
 })

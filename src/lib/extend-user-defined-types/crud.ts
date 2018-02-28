@@ -6,20 +6,29 @@ import { IGraphexType, IGraphexSchema, IGraphexField, IGraphexNode } from '../gr
 import { TypeNode } from 'graphql';
 
 const BANG = '!'
-const joinWithLF = (lines: string[]): string => lines.join('\n')
-const getInputTypeNameForNode = (node: IGraphexNode): string => `${node.type}Input`
+export const joinWithLF = (lines: string[]): string => lines.filter(ln => ln !== null).join('\n')
+const getAddInputTypeNameForNode = (node: IGraphexNode): string => `Add${node.type}Input`
+const getEditInputTypeNameForNode = (node: IGraphexNode): string => `Edit${node.type}Input`
+
 const isScalar = (field: IGraphexField): boolean => _.includes(['String', 'Int', 'Float', 'Boolean', 'JSON', 'Date', 'DateTime', 'Time'], field.type)
-const generateFieldInput = (field: IGraphexField): string => `${field.name}: ${isScalar(field) ? field.type : getInputTypeNameForNode(field)}${field.attributes.required ? BANG : ''}`
+const generateFieldInput = (field: IGraphexField): string => {
+  return isScalar(field) ? `${field.name}: ${field.type}${field.attributes.required ? BANG : ''}` : null
+  // `${field.name}: ${isScalar(field) ? field.type : getAddInputTypeNameForNode(field)}${field.attributes.required ? BANG : ''}`
+}
 
 export const generateInput = (type: IGraphexType): string => joinWithLF([
-  `input ${getInputTypeNameForNode(type)} {`,
+  `input ${getAddInputTypeNameForNode(type)} {`,
+  joinWithLF(type.fields.filter((field) => field.type !== 'ID').map(generateFieldInput)),
+  '}',
+  `input ${getEditInputTypeNameForNode(type)} {`,
+  '_id: ID!',
   joinWithLF(type.fields.filter((field) => field.type !== 'ID').map(generateFieldInput)),
   '}',
 ])
 const generateInputs = (graphexSchema: IGraphexType[]): string => joinWithLF(graphexSchema.map(generateInput))
 
-const getAddQuery = (type: IGraphexType): string => `add${type.name}(input: ${getInputTypeNameForNode(type)}${BANG}): ${type.name}`
-const getEditQuery = (type: IGraphexType): string => `edit${type.name}(_id: ID!, input: ${getInputTypeNameForNode(type)}${BANG}): ${type.name}`
+const getAddQuery = (type: IGraphexType): string => `add${type.name}(input: ${getAddInputTypeNameForNode(type)}${BANG}): ${type.name}`
+const getEditQuery = (type: IGraphexType): string => `edit${type.name}(_id: ID!, input: ${getEditInputTypeNameForNode(type)}${BANG}): ${type.name}`
 const getDeleteQuery = (type: IGraphexType): string => `delete${type.name}(_id: ID!): ${type.name}`
 
 export const attachCrudOperations = (userTypes: string, graphexSchema: IGraphexType[]): string => {
