@@ -1,4 +1,4 @@
-import {  writeRelation, selectionToCypher, writeObjectNode, ISelectionNode } from '../src/index'
+import { writeRelation, selectionToCypher, writeObjectNode, ISelectionNode } from '../src/index'
 
 const mySelection2: ISelectionNode = {
   name: 'technology',
@@ -21,6 +21,7 @@ const mySelection2: ISelectionNode = {
     }],
   }],
 }
+console.log(selectionToCypher(mySelection2))
 
 const mySelection: ISelectionNode = {
   name: 'product',
@@ -106,11 +107,15 @@ describe('writeObjectNode', () => {
   });
 })
 
+const myCypher2 = `MATCH (technology:Technology {id: "f910083b-1310-4b6e-be2f-862b803d1684"}) RETURN technology { .id, organizations: [(technology)-[:MyRelation]-(technology_organizations:Organization) | technology_organizations { .id }] }`
+
 describe('Name of the group', () => {
   it('should behave...', () => {
-    const cypher = selectionToCypher(mySelection)
-    expect(cypher).toBe(myCypher)
+    expect(selectionToCypher(mySelection)).toBe(myCypher)
   });
+  it('should work for mySelection2', () => {
+    expect(selectionToCypher(mySelection2)).toBe(myCypher2)
+  })
 });
 
 /*
