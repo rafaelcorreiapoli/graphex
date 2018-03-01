@@ -13,7 +13,6 @@ const getEditInputTypeNameForNode = (node: IGraphexNode): string => `Edit${node.
 const isScalar = (field: IGraphexField): boolean => _.includes(['String', 'Int', 'Float', 'Boolean', 'JSON', 'Date', 'DateTime', 'Time'], field.type)
 const generateFieldInput = (field: IGraphexField): string => {
   return isScalar(field) ? `${field.name}: ${field.type}${field.attributes.required ? BANG : ''}` : null
-  // `${field.name}: ${isScalar(field) ? field.type : getAddInputTypeNameForNode(field)}${field.attributes.required ? BANG : ''}`
 }
 
 export const generateInput = (type: IGraphexType): string => joinWithLF([

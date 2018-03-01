@@ -1,4 +1,5 @@
 import Session from 'neo4j-driver/types/v1/session';
+import { log } from '../lib/common/string';
 // import { insertNode, getNodesByLabel, getNodeById, linkNodes, unlinkNodes, getRelations } from './diplomat'
 
 export interface ICtx {
@@ -7,7 +8,7 @@ export interface ICtx {
 export const resolvers = {
   Query: {
     allTechnologies: (value, args, ctx: ICtx, info) => {
-      return []
+      log(info)
     },
     organization: (value, args, ctx, info) => null,
     allOrganizations: (value, args, ctx: ICtx, info) => {
