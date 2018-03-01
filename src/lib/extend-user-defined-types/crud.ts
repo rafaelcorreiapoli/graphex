@@ -39,7 +39,7 @@ export const attachCrudOperations = (userTypes: string, graphexSchema: IGraphexT
     ])))
   const queries: string = joinWithLF(graphexSchema.map((type) =>
     joinWithLF([
-      `${lowerFirstLetter(type.name)}: ${type.name}`,
+      `${lowerFirstLetter(type.name)}(_id: ID!): ${type.name}`,
       `all${pluralize(type.name)}: [${type.name}]`,
     ])))
 

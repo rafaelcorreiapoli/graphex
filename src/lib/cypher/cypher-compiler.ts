@@ -52,7 +52,12 @@ const buildCypherSelection = (selections: SelectionNode[], schemaType: GraphQLNa
       if (schemaType instanceof GraphQLObjectType) {
 
         const schemaFields = schemaType.getFields()
+        
         const field = schemaFields[fieldName]
+        if (!field) {
+          console.log(schemaFields)
+          console.log(fieldName)
+        }
         const inner = innerType(field.type)
         if (inner instanceof GraphQLScalarType) {
           return `.${fieldName}`
@@ -61,7 +66,7 @@ const buildCypherSelection = (selections: SelectionNode[], schemaType: GraphQLNa
           const selectionSelections = selection.selectionSet.selections
           const directives = directivesToJson(field.astNode.directives)
           const { relation } = directives
-          return `${fieldName}: [${writeObjectNode(variable)}${writeRelation(directives.relation.name)}${writeObjectNode(nestedFieldName, inner.name)} | ${nestedFieldName} { ${buildCypherSelection(selectionSelections, schemaType, nestedFieldName)} }]`
+          return `${fieldName}: [${writeObjectNode(variable)}${writeRelation(directives.relation.name)}${writeObjectNode(nestedFieldName, inner.name)} | ${nestedFieldName} { ${buildCypherSelection(selectionSelections, inner, nestedFieldName)} }]`
         }
       }
     }
@@ -69,14 +74,14 @@ const buildCypherSelection = (selections: SelectionNode[], schemaType: GraphQLNa
 
 }
 
-export const codeGenerator = (args: any, info: GraphQLResolveInfo) => {
+export const codeGenerator = (params: any, info: GraphQLResolveInfo) => {
   const variable = info.fieldName
   const type = info.returnType.toString()
-  const argString = writeArgsString(args)
+  const argString = writeArgsString(params)
   const selections =  info.fieldNodes[0].selectionSet.selections;
   const schemaType = info.schema.getType(type);
   return [
     `MATCH (${variable}:${type} ${argString})`,
-    `RETURN ${variable} { ${buildCypherSelection(selections, schemaType, variable)} } AS ${variable}`,
+    `RETURN ${variable} { ${buildCypherSelection(selections, schemaType, variable)} }`,
   ].join(' ')
 }

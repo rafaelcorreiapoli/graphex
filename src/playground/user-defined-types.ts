@@ -1,13 +1,48 @@
 export const userDefinedTypes = `
   type Technology {
-    id: ID!
+    _id: ID!
     name: String!
-    organizations: [Organization]  @relation(name: "MyRelation", direction: "IN")
+    projects: [Project]  @relation(name: "TECHNOLOGIES_PROJECTS")
+    organizations: [Organization]  @relation(name: "TECHNOLOGIES_ORGANIZATIONS")
+    attachments: [Attachment]  @relation(name: "TECHNOLOGIES_ATTACHMENTS")
+    tags: [Tag]  @relation(name: "TECHNOLOGIES_TAGS")
   }
 
-  type Organization {
-    id: ID!
+  type Project {
+    _id: ID!
     name: String!
-    technologies: [Technology] @relation(name: "MyRelation", direction: "OUT")
+    technologies: [Technology]  @relation(name: "TECHNOLOGIES_PROJECTS")
+    organizations: [Organization]  @relation(name: "PROJECTS_ORGANIZATIONS")
+    attachments: [Attachment]  @relation(name: "PROJECTS_ATTACHMENTS")
+    tags: [Tag]  @relation(name: "PROJECTS_TAGS")
+  }
+
+
+  type Organization {
+    _id: ID!
+    name: String!
+    technologies: [Technology]  @relation(name: "TECHNOLOGIES_ORGANIZATIONS")
+    projects: [Project]  @relation(name: "PROJECTS_ORGANIZATIONS")
+    attachments: [Attachment]  @relation(name: "ORGANIZATIONS_ATTACHMENTS")
+    tags: [Tag]  @relation(name: "ORGANIZATIONS_TAGS")
+  }
+
+
+  type Attachment {
+    _id: ID!
+    name: String!
+    technologies: [Technology]  @relation(name: "TECHNOLOGIES_ATTACHMENTS")
+    projects: [Project]  @relation(name: "PROJECTS_ATTACHMENTS")
+    organizations: [Organization]  @relation(name: "ORGANIZATIONS_ATTACHMENTS")
+    tags: [Tag]  @relation(name: "ATTACHMENTS_TAGS")
+  }
+
+  type Tag {
+    _id: ID!
+    name: String!
+    technologies: [Technology]  @relation(name: "TECHNOLOGIES_TAGS")
+    projects: [Project]  @relation(name: "PROJECTS_TAGS")
+    organizations: [Organization]  @relation(name: "ORGANIZATIONS_TAGS")
+    attachments: [Attachment]  @relation(name: "ATTACHMENTS_TAGS")
   }
 `

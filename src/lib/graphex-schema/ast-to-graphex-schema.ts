@@ -1,4 +1,3 @@
-import { getFieldWithDefaultAttributes } from './helpers'
 import { DocumentNode, DefinitionNode, ObjectTypeDefinitionNode, FieldDefinitionNode, TypeNode, NamedTypeNode, DirectiveNode, ValueNode, ListValueNode, BooleanValueNode, StringValueNode, IntValueNode, FloatValueNode } from 'graphql';
 
 export interface IGraphexDirectives {
