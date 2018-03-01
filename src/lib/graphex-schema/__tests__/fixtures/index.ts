@@ -1,6 +1,4 @@
-import { getFieldWithDefaultAttributes } from '../../src/lib/graphex-schema/helpers'
-import { userDefinedTypesToGraphexSchema } from '../../src/lib/graphex-schema/index'
-const schemaDefinition = `
+export const schemaDefinition = `
 type User @storage(db: "mysql", collection: "Users") @auth(scope: ["admin", "manager"], fn: "isOwner"){
   _id: ID!
   name: String!
@@ -24,7 +22,7 @@ const defaults = {
   required: false,
 }
 
-const expected = [{
+export const expected = [{
   name: 'User',
   type: 'User',
   directives: {
@@ -140,8 +138,3 @@ const expected = [{
     },
   }],
 }]
-describe('getThunderSchema', () => {
-  it('can convert a schemaDefinition to a thunderSchema', () => {
-    expect(userDefinedTypesToGraphexSchema(schemaDefinition)).toEqual(expected)
-  })
-})

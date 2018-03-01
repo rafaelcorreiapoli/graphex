@@ -1,13 +1,7 @@
 import { GraphQLResolveInfo, GraphQLOutputType, SelectionNode, GraphQLNamedType, GraphQLScalarType, GraphQLObjectType, GraphQLNonNull, GraphQLList, GraphQLEnumType, GraphQLInterfaceType, GraphQLUnionType, DirectiveNode, ArgumentNode, ValueNode, StringValueNode } from 'graphql'
-import { joinWithLF } from '../lib/extend-user-defined-types/crud'
 import * as _ from 'lodash'
-import { log } from '../lib/common/string';
-import { IGraphexDirectives } from '../lib/graphex-schema/ast-to-graphex-schema'
-
-const ifTruthy = (val: any, char: string) => val ? char : ''
-export const writeObjectNode = (alias: string, type?: string, args?: any) => `(${ifTruthy(alias, alias)}${ifTruthy(type, `:${type}`)}${ifTruthy(args, ` ${writeArgsString(args)}`)})`
-export const writeRelation = (relationName: string, arrowLeft: boolean = false, arrowRight: boolean = false) => `${(arrowLeft && !arrowRight) ? '<' : ''}-[:${relationName}]-${(arrowRight && !arrowLeft) ? '>' : ''}`
-const writeArgsString = (args: any) => args && JSON.stringify(args).replace(/\"([^(\")"]+)\":/g, '$1:')
+import { IGraphexDirectives } from '../graphex-schema/ast-to-graphex-schema';
+import { writeObjectNode, writeRelation, writeArgsString } from './code-generation'
 
 const innerType = (type: GraphQLOutputType): GraphQLScalarType | GraphQLObjectType => {
   if (type instanceof GraphQLInterfaceType || type instanceof GraphQLUnionType || type instanceof GraphQLEnumType || type instanceof GraphQLInterfaceType) {

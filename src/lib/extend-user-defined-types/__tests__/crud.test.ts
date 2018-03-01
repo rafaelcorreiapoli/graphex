@@ -1,5 +1,6 @@
-import { attachCrudOperations, generateInput, joinWithLF } from '../../src/lib/extend-user-defined-types/crud'
+import { attachCrudOperations, generateInput, joinWithLF } from '../crud'
 import { graphexSchema } from './fixtures'
+
 const userTypes = `type User @auth(fn: "isOwner"){
   _id: ID!
   name: String!
