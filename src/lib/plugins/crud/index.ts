@@ -1,6 +1,6 @@
 import { makeExecutableSchema } from 'graphql-tools'
-import { GraphQLSchema, parse, DocumentNode, ObjectTypeDefinitionNode } from 'graphql'
-import { ITypeDefinitions, IResolvers} from 'graphql-tools/dist/Interfaces';
+import { GraphQLSchema, parse, DocumentNode, ObjectTypeDefinitionNode, GraphQLResolveInfo } from 'graphql'
+import { ITypeDefinitions, IResolvers, IFieldResolver} from 'graphql-tools/dist/Interfaces';
 import { ISchemaPlugin } from '../interface';
 import { joinWithLF, lowerFirstLetter } from '../../common/string';
 import { userDefinedTypesToGraphexSchema } from '../../graphex-schema/index'
@@ -37,18 +37,14 @@ const generateInputs = (graphexSchema: IGraphexType[]): string => joinWithLF(gra
 const getCreateFieldName = (name: string) => `add${name}`
 const getUpdateFieldName = (name: string) => `edit${name}`
 const getDeleteFieldName = (name: string) => `delete${name}`
+const getRetrieveSingleFieldName = (name: string) => `${lowerFirstLetter(name)}`
+const getRetrieveAllFieldName = (name: string) => `all${name}`
 
 const getCreateMutationField = (type: IGraphexType): string => `${getCreateFieldName(type.name)}(input: ${getAddInputTypeNameForNode(type)}${BANG}): ${type.name}`
 const getUpdateMutationField = (type: IGraphexType): string => `${getUpdateFieldName(type.name)}(input: ${getEditInputTypeNameForNode(type)}${BANG}): ${type.name}`
 const getDeleteMutationField = (type: IGraphexType): string => `${getDeleteFieldName(type.name)}(_id: ID!): ${type.name}`
-
-const getCreateMutationResolver = (field: ObjectTypeDefinitionNode, driverGetter: DriverGetter) => {
-  return (value, params, ctx, info) => {
-    const driver = driverGetter(ctx)
-    const session = driver.session()
-    return insertNode(session, field.name.value, params)
-  }
-}
+const getRetrieveSingleField = (type: IGraphexType): string => `${getRetrieveSingleFieldName(type.name)}(_id: ID!): ${type.name}`
+const getRetrieveAllField = (type: IGraphexType): string => `${getRetrieveAllFieldName(type.name)}: [${type.name}]`
 
 interface IDirectives {
   crud: {
@@ -56,20 +52,31 @@ interface IDirectives {
   }
 }
 
+export interface IParams {
+  [argument: string]: any;
+}
 export interface IOperationExecutor {
-  create(typeName: string, params: any, ctx: any): Promise<any>
-  delete(typeName: string, params: any, ctx: any): Promise<any>
-  update(typeName: string, params: any, ctx: any): Promise<any>
+  create(typeName: string, value: any, params: IParams, ctx: any, info: GraphQLResolveInfo): Promise<any>
+  delete(typeName: string, value: any, params: IParams, ctx: any, info: GraphQLResolveInfo): Promise<any>
+  update(typeName: string, value: any, params: IParams, ctx: any, info: GraphQLResolveInfo): Promise<any>
+  retrieveSingle(typeName: string, value: any, params: IParams, ctx: any, info: GraphQLResolveInfo): Promise<any>
+  retrieveMultiple(typeName: string, value: any, params: IParams, ctx: any, info: GraphQLResolveInfo): Promise<any>
 }
 
-const delegateCreateToExecutor = (field: ObjectTypeDefinitionNode, operationExecutor: IOperationExecutor) => (value, params, ctx, info) => {
-  return operationExecutor.create(field.name.value, params, ctx)
+const delegateCreateToExecutor = (field: ObjectTypeDefinitionNode, operationExecutor: IOperationExecutor): IFieldResolver<any, any> => (value, params, ctx, info) => {
+  return operationExecutor.create(field.name.value, value, params, ctx, info)
 }
-const delegateUpdateToExecutor = (field: ObjectTypeDefinitionNode, operationExecutor: IOperationExecutor) => (value, params, ctx, info) => {
-  return operationExecutor.update(field.name.value, params, ctx)
+const delegateUpdateToExecutor = (field: ObjectTypeDefinitionNode, operationExecutor: IOperationExecutor): IFieldResolver<any, any> => (value, params, ctx, info) => {
+  return operationExecutor.update(field.name.value, value, params, ctx, info)
 }
-const delegateDeleteToExecutor = (field: ObjectTypeDefinitionNode, operationExecutor: IOperationExecutor) => (value, params, ctx, info) => {
-  return operationExecutor.delete(field.name.value, params, ctx)
+const delegateDeleteToExecutor = (field: ObjectTypeDefinitionNode, operationExecutor: IOperationExecutor): IFieldResolver<any, any> => (value, params, ctx, info) => {
+  return operationExecutor.delete(field.name.value, value, params, ctx, info)
+}
+const delegateRetrieveSingleToExecutor = (field: ObjectTypeDefinitionNode, operationExecutor: IOperationExecutor): IFieldResolver<any, any> => (value, params, ctx, info) => {
+  return operationExecutor.retrieveSingle(field.name.value, value, params, ctx, info)
+}
+const delegateRetrieveMultipleToExecutor = (field: ObjectTypeDefinitionNode, operationExecutor: IOperationExecutor): IFieldResolver<any, any> => (value, params, ctx, info) => {
+  return operationExecutor.retrieveMultiple(field.name.value, value, params, ctx, info)
 }
 
 export class CrudSchemaPlugin implements ISchemaPlugin {
@@ -95,8 +102,8 @@ export class CrudSchemaPlugin implements ISchemaPlugin {
 
     const queries: string = joinWithLF(this.graphexSchema.map((type) =>
       joinWithLF([
-        `${lowerFirstLetter(type.name)}(_id: ID!): ${type.name}`,
-        `all${pluralize(type.name)}: [${type.name}]`,
+        getRetrieveSingleField(type),
+        getRetrieveAllField(type),
       ])))
 
     return joinWithLF([
@@ -126,7 +133,7 @@ export class CrudSchemaPlugin implements ISchemaPlugin {
       return false
     }) as ObjectTypeDefinitionNode[]
 
-    const resolvers = typesWithCrudDirective.reduce((acc, type) => {
+    const mutationResolvers = typesWithCrudDirective.reduce((acc, type) => {
       return {
         ...acc,
         [getCreateFieldName(type.name.value)]: delegateCreateToExecutor(type, this.operationExecutor),
@@ -135,8 +142,17 @@ export class CrudSchemaPlugin implements ISchemaPlugin {
       }
     }, {})
 
+    const queryResolvers = typesWithCrudDirective.reduce((acc, type) => {
+      return {
+        ...acc,
+        [getRetrieveSingleFieldName(type.name.value)]: delegateRetrieveSingleToExecutor(type, this.operationExecutor),
+        [getRetrieveAllFieldName(type.name.value)]: delegateRetrieveMultipleToExecutor(type, this.operationExecutor),
+      }
+    }, {})
+
     return {
-      Mutation: resolvers,
+      Mutation: mutationResolvers,
+      Query: queryResolvers,
     }
   }
 

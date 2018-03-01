@@ -69,9 +69,9 @@ const buildCypherSelection = (selections: SelectionNode[], schemaType: GraphQLNa
 
 }
 
-export const codeGenerator = (params: any, info: GraphQLResolveInfo) => {
+export const generateCypher = (params: any, info: GraphQLResolveInfo) => {
   const variable = info.fieldName
-  const type = info.returnType.toString()
+  const type = innerType(info.returnType).toString()
   const argString = writeArgsString(params)
   const selections =  info.fieldNodes[0].selectionSet.selections;
   const schemaType = info.schema.getType(type);

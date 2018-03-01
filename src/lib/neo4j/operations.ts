@@ -18,3 +18,15 @@ export interface IEntityObject {
     properties: any,
   }
 }
+
+export const findSingle = (session: Session, query: string, variable: string) => session.run(query).then((result) => {
+  if (result.records.length > 0) {
+    return result.records[0].get(variable);
+  } else {
+    return null;
+  }
+})
+
+export const findMultiple = (session: Session, query: string, variable: string) => session.run(query).then((result) => {
+  return result.records.map((record) => record.get(variable))
+})
