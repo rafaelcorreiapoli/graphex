@@ -26,16 +26,16 @@ export const generateInput = (type: IGraphexType): string => joinWithLF([
 ])
 const generateInputs = (graphexSchema: IGraphexType[]): string => joinWithLF(graphexSchema.map(generateInput))
 
-const getAddQuery = (type: IGraphexType): string => `add${type.name}(input: ${getAddInputTypeNameForNode(type)}${BANG}): ${type.name}`
-const getEditQuery = (type: IGraphexType): string => `edit${type.name}(input: ${getEditInputTypeNameForNode(type)}${BANG}): ${type.name}`
-const getDeleteQuery = (type: IGraphexType): string => `delete${type.name}(_id: ID!): ${type.name}`
+const getAddMutation = (type: IGraphexType): string => `add${type.name}(input: ${getAddInputTypeNameForNode(type)}${BANG}): ${type.name} @crud(operation: "create")`
+const getEditMutation = (type: IGraphexType): string => `edit${type.name}(input: ${getEditInputTypeNameForNode(type)}${BANG}): ${type.name} @crud(operation: "update")`
+const getDeleteMutation = (type: IGraphexType): string => `delete${type.name}(_id: ID!): ${type.name} @crud(operation: "delete")`
 
 export const attachCrudOperations = (userTypes: string, graphexSchema: IGraphexType[]): string => {
   const mutations: string = joinWithLF(graphexSchema.map((type) =>
     joinWithLF([
-      getAddQuery(type),
-      getEditQuery(type),
-      getDeleteQuery(type),
+      getAddMutation(type),
+      getEditMutation(type),
+      getDeleteMutation(type),
     ])))
   const queries: string = joinWithLF(graphexSchema.map((type) =>
     joinWithLF([

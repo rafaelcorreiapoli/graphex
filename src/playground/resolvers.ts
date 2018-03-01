@@ -3,6 +3,7 @@ import { log } from '../lib/common/string';
 // import { insertNode, getNodesByLabel, getNodeById, linkNodes, unlinkNodes, getRelations } from './diplomat'
 import { codeGenerator } from '../lib/cypher/cypher-compiler'
 import { Driver } from 'neo4j-driver/types/v1';
+import { GraphQLResolveInfo } from 'graphql';
 
 export interface ICtx {
   driver: Driver
@@ -14,6 +15,9 @@ export enum ReturnType {
 }
 
 export const resolvers = {
+  Organization: {
+    name: () => 'porra'
+  },
   Query: {
     allTechnologies: (value, args, ctx: ICtx, info) => {
       log(info)
@@ -22,22 +26,22 @@ export const resolvers = {
     allOrganizations: (value, args, ctx: ICtx, info) => {
       return []
     },
-    technology: async (value, params, ctx: ICtx, info): any => {
+    technology: async (value, params, ctx: ICtx, info: GraphQLResolveInfo): Promise<any> => {
       const cypherQuery = codeGenerator(params, info)
 
-      const returnType: ReturnType = info.returnType.toString().startsWith('[') ? ReturnType.ARRAY : ReturnType.OBJECT
+      const returnType: ReturnType = info.returnType.toString().charAt(0) === '[' ? ReturnType.ARRAY : ReturnType.OBJECT
 
       const session = ctx.driver.session()
       const result = await session.run(cypherQuery)
+      const variable = info.fieldName
 
       switch (returnType) {
         case ReturnType.ARRAY:
-          return result.records.map((record) => record.get('technology'))
+          return result.records.map((record) => record.get(variable))
         case ReturnType.OBJECT:
-          console.log(result)
           if (result.records.length > 0) {
             // FIXME: use one of the new neo4j-driver consumers when upgrading neo4j-driver package
-            return result.records[0].get('technology');
+            return result.records[0].get(variable);
           } else {
             return null;
           }

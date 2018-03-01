@@ -14,3 +14,5 @@ export const forceArray = (something: any) => {
 }
 
 export const isEmpty = (obj: any) => obj && Object.keys(obj).length === 0
+
+export const joinWithLF = (lines: string[]): string => lines.filter((ln) => ln !== null).join('\n')

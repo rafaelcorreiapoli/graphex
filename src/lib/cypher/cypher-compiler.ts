@@ -35,12 +35,12 @@ export const getValueFromArg = (argValue: ValueNode): any => {
   return null
 }
 
-const argumentsToJson = (args: ArgumentNode[]) => args.reduce((acc, arg) => ({
+export const argumentsToJson = (args: ArgumentNode[]) => args.reduce((acc, arg) => ({
   ...acc,
   [arg.name.value]: getValueFromArg(arg.value),
 }), {})
 
-const directivesToJson = (directives: DirectiveNode[]): IGraphexDirectives => directives.reduce((acc, directive) => ({
+export const directivesToJson = (directives: DirectiveNode[]): IGraphexDirectives => directives.reduce((acc, directive) => ({
   ...acc,
   [directive.name.value]: argumentsToJson(directive.arguments),
 }), {}) as IGraphexDirectives
@@ -52,12 +52,7 @@ const buildCypherSelection = (selections: SelectionNode[], schemaType: GraphQLNa
       if (schemaType instanceof GraphQLObjectType) {
 
         const schemaFields = schemaType.getFields()
-        
         const field = schemaFields[fieldName]
-        if (!field) {
-          console.log(schemaFields)
-          console.log(fieldName)
-        }
         const inner = innerType(field.type)
         if (inner instanceof GraphQLScalarType) {
           return `.${fieldName}`
