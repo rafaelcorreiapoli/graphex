@@ -1,5 +1,5 @@
 export const userDefinedTypes = `
-  type Technology {
+  type Technology @crud(use: ["create", "delete"]) {
     _id: ID!
     name: String!
     projects: [Project]  @relation(name: "TECHNOLOGIES_PROJECTS")
@@ -8,7 +8,7 @@ export const userDefinedTypes = `
     tags: [Tag]  @relation(name: "TECHNOLOGIES_TAGS")
   }
 
-  type Project {
+  type Project{
     _id: ID!
     name: String!
     technologies: [Technology]  @relation(name: "TECHNOLOGIES_PROJECTS")
@@ -18,7 +18,7 @@ export const userDefinedTypes = `
   }
 
 
-  type Organization {
+  type Organization @crud {
     _id: ID!
     name: String!
     technologies: [Technology]  @relation(name: "TECHNOLOGIES_ORGANIZATIONS")
@@ -28,7 +28,7 @@ export const userDefinedTypes = `
   }
 
 
-  type Attachment {
+  type Attachment @crud {
     _id: ID!
     name: String!
     technologies: [Technology]  @relation(name: "TECHNOLOGIES_ATTACHMENTS")
@@ -37,7 +37,7 @@ export const userDefinedTypes = `
     tags: [Tag]  @relation(name: "ATTACHMENTS_TAGS")
   }
 
-  type Tag {
+  type Tag @crud {
     _id: ID!
     name: String!
     technologies: [Technology]  @relation(name: "TECHNOLOGIES_TAGS")
